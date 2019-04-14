@@ -1,26 +1,37 @@
+import java.lang.reflect.Array;
 import java.util.Arrays;
 
 public class Assignment1 {
 
-    public static void main(String args [])
-    {
+    public static void main(String[] args) {
 
-        Integer[] arrayToBeSorted =  new Integer[100];
-        fillArray(arrayToBeSorted);
-        printArray(arrayToBeSorted);
-        MergeSort<Integer> sortedArray = new MergeSort<Integer>(arrayToBeSorted);
-        sortedArray.printArray();
+        Integer arr[] = fillArray(100);
 
+        System.out.println("Before");
+        System.out.println(Arrays.toString(arr));
+
+        MergeSort mr = new MergeSort(arr,0,arr.length-1);
+
+        Thread t = new Thread(mr);
+
+        t.start();
+
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("after");
+        System.out.println(Arrays.toString(mr.resultArr));
     }
 
-    private static void fillArray(Integer[] a) {
+    private static Integer[] fillArray(int size) {
+        Integer[] a = new Integer[size];
         for(int i = 0; i < a.length; i++){
             int r = (int) (Math.random() * 10000 + 1);
             a[i] = r;
         }
-    }
-
-    private static void printArray(Integer[] a){
-        System.out.println(Arrays.toString(a));
+        return a;
     }
 }

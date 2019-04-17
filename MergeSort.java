@@ -1,164 +1,77 @@
-import org.omg.CORBA.Any;
-
-import java.lang.reflect.Array;
 import java.util.Arrays;
 
-public class MergeSort implements Runnable{
+public  class MergeSort<AnyType extends Comparable<? super AnyType>> implements Runnable{
 
+    private AnyType[] arr;
+    private int start, stop;
 
-    private Integer[] arr;
-    private int Size;
-    private int left;
-    private int right;
-    public Integer[] resultArr ;
-
-    public MergeSort(Integer[] arr, int i, int j) {
+    public MergeSort(AnyType[] arr, int start, int stop) {
         this.arr = arr;
-        this.Size = arr.length;
-        //this.resultArr = new int[j-i+1];
-        this.left  = i;
-        this.right = j;
+        this.start = start;
+        this.stop = stop;
     }
 
-
-
-    @Override
-    public void run() {
-        sort();
-
+    public void sort() throws InterruptedException {
+        this.mergeSort(this.arr, this.start, this.stop);
     }
 
-    private void sort() {
-
-        if(left==right && left >=0 )
-        {
-            this.resultArr = new Integer[]{arr[left]};
+    private void mergeSort(AnyType[] arr, int start, int stop) throws InterruptedException {
+        if (start == stop) {
             return;
         }
-        if(left>right) return;
+        int mid = Math.floorDiv(start + stop, 2);
+        Thread t = new Thread (new MergeSort<AnyType>(arr, mid+1, stop));
+        t.start();
+        mergeSort(arr, start, mid);
+        t.join();
+        merge(start, stop);
+    }
 
-        int rightLimit = this.left+(right-left)/2;
-        //int leftArr[] = sort( left,rightLimit );
-
-        MergeSort mleft = new MergeSort(arr,left,rightLimit);
-        Thread t1 = new Thread(mleft);
-        t1.start();
-
-        int leftlimit = 1 + rightLimit;
-        //int rightArr[] = sort(leftlimit , right);
-
-        MergeSort mright= new MergeSort(arr,leftlimit,right);
-        Thread t2 = new Thread(mright);
-        t2.start();
-
-
+    public void run() {
         try {
-            t1.join();
-            t2.join();
+            this.sort();
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        merge(mleft.resultArr,mright.resultArr);
-    }
-
-    private  Integer[] merge(Integer[] left, Integer[] right) {
-        resultArr = new Integer[left.length+right.length];
-
-        int r=0;
-        int i=0;
-        int j=0;
-        while(i<left.length && j <right.length )
-        {
-            if( i<left.length && j<right.length && left[i] < right[j] )
-                resultArr[r++] = left[i++];
-
-            else if( j<right.length && i<left.length && right[j] < left[i])
-                resultArr[r++] = right[j++];
-        }
-
-
-        while(i<left.length)
-        {
-            resultArr[r++] = left[i++];
-        }
-
-        while(j<right.length)
-        {
-            resultArr[r++] = right[j++];
-        }
-
-
-        //System.out.println("resultArr "+resultArr);
-        return resultArr;
     }
 
 
+    public void ChangeArr(AnyType[] newArr, int start, int stop) {
+        for (int i = 0; i < newArr.length; i++) {
+            this.arr[start + i] = newArr[i];
+        }
+    }
 
+    public void merge(int start, int stop) {
+
+        int middle = Math.floorDiv(start + stop, 2);
+        AnyType[] arr1 = Arrays.copyOfRange(arr, start, middle+1);
+        AnyType[] arr2 = Arrays.copyOfRange(arr, middle + 1, stop+1);
+        AnyType[] newArr = (AnyType[]) new Comparable[arr1.length + arr2.length];
+        int arr1i = 0, arr2i = 0;
+        AnyType first, second;
+        for (int i = 0; i < newArr.length; i++) {
+            if (arr1i < arr1.length && arr2i < arr2.length) {
+                first = arr1[arr1i];
+                second = arr2[arr2i];
+                if (first.compareTo(second) > 0) {
+                    newArr[i] = second;
+                    arr2i++;
+                } else {
+                    newArr[i] = first;
+                    arr1i++;
+                }
+            } else if (arr1i < arr1.length) {
+                first = arr1[arr1i];
+                newArr[i] = first;
+                arr1i++;
+            } else {
+                second = arr2[arr2i];
+                newArr[i] = second;
+                arr2i++;
+            }
+
+        }
+        ChangeArr(newArr, start, stop);
+    }
 }
-//public  class MergeSort<AnyType extends Comparable<? super AnyType>> implements Runnable{
-//
-//    private AnyType[] v;
-//    private int from, to;
-//    private int length;
-//    private AnyType[] answer;
-//
-//    public MergeSort(AnyType [] v, int from, int to){
-//        this.v = v;
-//        this.from = from;
-//        this.to = to;
-//        this.length = v.length;
-//        this.answer = (AnyType[]) new Comparable[length];
-//
-//    }
-//
-//    private void sort(AnyType[] v, int from, int to){
-//        if (from < to) {
-//            int middle = from + (from - to) / 2;
-//            Thread childThread = new Thread(new MergeSort<AnyType>(v, from, middle));
-//            childThread.start();
-//            sort(v, middle+1, to);
-//            try {
-//                childThread.join();
-//            }
-//            catch (InterruptedException e) {}
-//            merge(from, middle, to);
-//        }
-//        else return;
-//    }
-//
-//    private void merge(int form, int middle, int to){
-//        for (int i = form; i <= to; i++) {
-//            answer[i] = v[i];
-//        }
-//        int i = form;
-//        int j = middle + 1;
-//        int k = form;
-//        while (i <= middle && j <= to) {
-//            if (answer[i].compareTo(answer[j]) == 0) {
-//                v[k] = answer[i];
-//                i++;
-//            } else {
-//                v[k] = answer[j];
-//                j++;
-//            }
-//            k++;
-//        }
-//        while (i <= middle) {
-//            v[k] = answer[i];
-//            k++;
-//            i++;
-//        }
-//    }
-//
-//    @Override
-//    public void run() {
-//        sort(v, from, to);
-//    }
-//
-//    private void printArray(){
-//        System.out.println(Arrays.toString(this.v));
-//    }
-//
-//
-//}

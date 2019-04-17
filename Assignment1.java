@@ -10,7 +10,7 @@ public class Assignment1 {
         System.out.println("Before");
         System.out.println(Arrays.toString(arr));
 
-        MergeSort mr = new MergeSort(arr,0,arr.length-1);
+        MergeSort<Integer> mr = new MergeSort<Integer>(arr,0,arr.length-1);
 
         Thread t = new Thread(mr);
 
@@ -23,7 +23,7 @@ public class Assignment1 {
         }
 
         System.out.println("after");
-        System.out.println(Arrays.toString(mr.resultArr));
+        System.out.println(Arrays.toString(arr));
     }
 
     private static Integer[] fillArray(int size) {
